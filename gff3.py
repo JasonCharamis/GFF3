@@ -125,3 +125,11 @@ class GFF3:
                     print(out, file=f)
         else:
             print("Gene list is empty." )
+
+
+           
+## Implementation ##
+
+#GFF3.extract_range ( args.gff3, args.chromosome, args.start, args.end  )
+GFF3.extract_genes ( args.gff3, args.gene_list )
+
