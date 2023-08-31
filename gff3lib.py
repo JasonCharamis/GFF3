@@ -150,8 +150,7 @@ class GFF3: ## Define class for GFF3 object
            
 ## Implementation ##
 
-def main():
-    # Parse command-line arguments
+def parse_args(): # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Library for efficiently manipulating gff3 files.')
     parser.add_argument('--gff3', type=str, help='GFF3 file that you would like to sort.')
     parser.add_argument('--bed', type=str, help='BED output file.')
@@ -161,7 +160,10 @@ def main():
     parser.add_argument('--chromosome', type=str, help='Chromosome whose range you would like to extract.')
     parser.add_argument('--start', type=str, help='Start position of the range you would like to extract.')
     parser.add_argument('--end', type=str, help='End position of the range you would like to extract.')
-    args = parser.parse_args()
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
 
     if not any(vars(args).values()):
         parser.print_help()
@@ -179,6 +181,8 @@ def main():
             GFF3.gff2bed(args.gff3, args.bed)
         else:
             print("Please provide either --extract, --bed or --gene_list option.")
+    else:
+        print("Please provide a gff3 file as input.")
             
 
 if __name__ == "__main__":
