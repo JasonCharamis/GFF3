@@ -37,7 +37,6 @@ class GFF3:
                     gff3_instances.append(gff3_instance)
 
             return gff3_instances  # Return the list of instances
-
             
     def gff2bed ( input_file, bed_file, only_genes = False ): ## convert gff3 to bed format
         gff3_instances = GFF3.parse_gff3(input_file)  # Get the list of instances from parse_gff3
@@ -51,8 +50,7 @@ class GFF3:
             out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene, gff3_instance.score, gff3_instance.strand] )
                 
             write_file ( out, args.bed )
-
-            
+     
     def extract_range (input_file, chromosome, start, end ): ## extract range from gff3 file
         gff3_instances = GFF3.parse_gff3(input_file)  # Get the list of instances from parse_gff3
         
@@ -72,8 +70,7 @@ class GFF3:
 
         with open(f"{inp}_extracted_{start}_{end}.gff3", "w") as f:
             for out in subset:
-                print ( out, file = f)
-      
+                print ( out, file = f) 
 
     def extract_genes ( input_file, gene_list ): ## extract gene coordinates from gff3 file        
         subset = []
@@ -93,7 +90,6 @@ class GFF3:
         elif isinstance(gene_list, str):
             glists = gene_list
 
-
         for gff3_instance in gff3_instances:            
             if re.search("gene",gff3_instance.type):
                 geneid = re.sub(".*Name=|\.t\d|;.*","", gff3_instance.name)
@@ -112,7 +108,6 @@ class GFF3:
 
             if found == True:
                 subset.append ( gff3_instance )
-
                 
         if len(subset) > 0:
             
@@ -133,10 +128,8 @@ class GFF3:
 
         else:
             print ( "Gene list was empty." )
-                    
 
 
-           
 ## Implementation ##
 
 def main():
