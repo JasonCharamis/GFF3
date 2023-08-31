@@ -18,7 +18,7 @@ class GFF3:
         self.name = name
 
     def __str__(self):
-        return f"{self.chromosome}\t{self.source} \t {self.type} \t {self.start} \t {self.end} \t {self.score} \t {self.strand} \t {self.phase} \t {self.name}"
+        return f"{self.chromosome}\t{self.source}\t{self.type}\t{self.start}\t{self.end}\t{self.score}\t{self.strand}\t{self.phase}\t{self.name}"
 
     
     def parse_gff3 (input_file ): ## opens gff3 file and creates new instance of the gff3 class
