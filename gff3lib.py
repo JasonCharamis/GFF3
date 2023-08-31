@@ -1,8 +1,25 @@
 import argparse
+from natsort import natsorted
 import re
 import os
-       
-class GFF3:
+
+
+def check_isfile ( input_file ): ## Function defined outside of class to check if input is a file or a string
+    if os.path.isfile(input_file):
+        glist = []
+        
+        with open(input_file, "r") as file:
+            lines = file.readlines()
+            for line in lines:
+                glist.append(line.strip())
+        return glist
+        
+    elif isinstance(input_file, str):
+        glists = input_file
+        return glists
+
+
+class GFF3: ## Define class for GFF3 object
     
     __slots__ = [ 'chromosome', 'source', 'type', 'start', 'end', 'score', 'strand', 'phase', 'name' ]
     
@@ -18,7 +35,7 @@ class GFF3:
         self.name = name
 
     def __str__(self):
-        return f"{self.chromosome}\t{self.source}\t{self.type}\t{self.start}\t{self.end}\t{self.score}\t{self.strand}\t{self.phase}\t{self.name}"
+        return f"{self.chromosome}\t{self.source} \t {self.type} \t {self.start} \t {self.end} \t {self.score} \t {self.strand} \t {self.phase} \t {self.name}"
 
     
     def parse_gff3 (input_file ): ## opens gff3 file and creates new instance of the gff3 class
@@ -37,6 +54,7 @@ class GFF3:
                     gff3_instances.append(gff3_instance)
 
             return gff3_instances  # Return the list of instances
+
             
     def gff2bed ( input_file, bed_file, only_genes = False ): ## convert gff3 to bed format
         gff3_instances = GFF3.parse_gff3(input_file)  # Get the list of instances from parse_gff3
@@ -50,7 +68,8 @@ class GFF3:
             out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene, gff3_instance.score, gff3_instance.strand] )
                 
             write_file ( out, args.bed )
-     
+
+            
     def extract_range (input_file, chromosome, start, end ): ## extract range from gff3 file
         gff3_instances = GFF3.parse_gff3(input_file)  # Get the list of instances from parse_gff3
         
@@ -70,32 +89,22 @@ class GFF3:
 
         with open(f"{inp}_extracted_{start}_{end}.gff3", "w") as f:
             for out in subset:
-                print ( out, file = f) 
+                print ( out, file = f)
 
-    def extract_genes ( input_file, gene_list ): ## extract gene coordinates from gff3 file        
+     
+    def extract_genes ( input_file, gene_list, coords = True ): ## extract gene coordinates from gff3 file        
         subset = []
         found = False
 
         gff3_instances = GFF3.parse_gff3(input_file)  # Get the list of instances from parse_gff3
 
-        if os.path.isfile(gene_list):
-            glist = []
-            
-            with open(gene_list, "r") as file:
-                lines = file.readlines()
-                for line in lines:
-                    glist.append(line.strip())
-                    
-        
-        elif isinstance(gene_list, str):
-            glists = gene_list
 
         for gff3_instance in gff3_instances:            
             if re.search("gene",gff3_instance.type):
                 geneid = re.sub(".*Name=|\.t\d|;.*","", gff3_instance.name)
 
-                if glist:
-                    if geneid in glist:
+                if check_isfile ( gene_list ):
+                    if geneid in check_isfile ( gene_list ):
                         found = True
                     else:
                         found = False
@@ -108,6 +117,7 @@ class GFF3:
 
             if found == True:
                 subset.append ( gff3_instance )
+
                 
         if len(subset) > 0:
             
@@ -118,18 +128,26 @@ class GFF3:
             def custom_sort_key(element):
                 return (element.chromosome,element.start, entry_type_order[element.type])
 
-            sorted_list = sorted(subset, key=custom_sort_key)  # Use the custom sorting function
+            sorted_list = natsorted(subset, key=custom_sort_key)  # Use the custom sorting function
 
             inp = re.sub ( ".gff3", "", input_file )
-        
-            with open(f"{inp}_extracted_{gene_list}.gff3", "w") as f:
-                for out in sorted_list:
-                    print ( out, file = f )
+
+            if coords == True:
+                with open(f"{inp}_extracted_{gene_list}.gff3", "w") as f:
+                    for out in sorted_list:
+                        print ( out, file = f )
+            else:
+                with open(f"{inp}_extracted_{gene_list}.bed", "w") as f:
+                    for out in sorted_list:
+                        if re.search("gene", out.type ):
+                            out.name = re.sub (".*Name=|\.t\d|;.*","",out.name)
+                            bed = '\t'.join([out.name, out.chromosome, out.start, out.end, out.strand])
+                            print ( bed, file = f )
 
         else:
-            print ( "Gene list was empty." )
+            print ( "Gene list is empty or not provided." )
 
-
+           
 ## Implementation ##
 
 def main():
@@ -139,6 +157,7 @@ def main():
     parser.add_argument('--bed', type=str, help='BED output file.')
     parser.add_argument('-l', '--gene_list', type=str, help='List with gene IDs that you would like to extract.')
     parser.add_argument('--extract', type=str, help='Option to extract range from GFF3 file.')
+    parser.add_argument('--coords', type=str, help='Option to extract bed-like features for selected genes.')
     parser.add_argument('--chromosome', type=str, help='Chromosome whose range you would like to extract.')
     parser.add_argument('--start', type=str, help='Start position of the range you would like to extract.')
     parser.add_argument('--end', type=str, help='End position of the range you would like to extract.')
@@ -154,6 +173,8 @@ def main():
             GFF3.extract_range(args.gff3, args.chromosome, args.start, args.end)
         elif args.gene_list:
             GFF3.extract_genes(args.gff3, args.gene_list)
+        elif args.gene_list and args.coords:
+            GFF3.extract_genes(args.gff3, args.gene_list, args.coords)
         elif args.gff2bed:
             GFF3.gff2bed(args.gff3, args.bed)
         else:
@@ -162,4 +183,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
+
