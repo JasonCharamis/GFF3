@@ -1,20 +1,7 @@
 from natsort import natsorted
 import os, re
+import core
 import argparse
-
-def check_isfile ( input_file ): ## Function to check if input is a file or a string
-    if os.path.isfile(input_file):
-        glist = []
-        
-        with open(input_file, "r") as file:
-            lines = file.readlines()
-            for line in lines:
-                glist.append(line.strip())
-        return glist
-        
-    elif isinstance(input_file, str):
-        glists = input_file
-        return glists
 
 
 class GFF3:
@@ -25,8 +12,8 @@ class GFF3:
         self.chromosome = chromosome
         self.source = source
         self.type = type
-        self.start = int(start)
-        self.end = int(end)
+        self.start = start
+        self.end = end
         self.score = score
         self.strand = strand
         self.phase = phase
@@ -78,8 +65,21 @@ class GFF3:
 
         return sorted_list
 
+
+    def gff2gtf ( input_file ): ## convert gff3 to bed format
+        gff3_instances = GFF3.sort_gff3(input_file)
+
+        outl = []
+
+        for gff3_instance in gff3_instances:
+            out = str()           
+            out = '\t'.join( [gff3_instance.chromosome, gff3_instance.source, gff3_instance.start, gff3_instance.end, gff3_instance.score, gff3_instance.strand, gff3_instance.phase, gff3_instance.name] )
+            outl.append(out)
+
+        return ( outl )
+
             
-    def gff2bed ( input_file, bed_file, only_genes = False ): ## convert gff3 to bed format
+    def gff2bed ( input_file ): ## convert gff3 to bed format
         gff3_instances = GFF3.sort_gff3(input_file)  # Get the list of instances from sort_gff3
 
         for gff3_instance in gff3_instances:
@@ -88,7 +88,7 @@ class GFF3:
             gene = re.sub(".*Name=|;.*","", gff3_instance.name)
             gene = re.sub ("-00001","",gene)
                         
-            out = ''.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene, gff3_instance.score, gff3_instance.strand] )
+            out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene, gff3_instance.score, gff3_instance.strand] )
                 
         return out
 
@@ -176,6 +176,7 @@ def kargs():
     parser.add_argument('--bed', action="store_true",help='BED output file.')
     parser.add_argument('-e','--extract', action="store_true", help='Option to extract range from GFF3 file.')
     parser.add_argument('-s','--sort', action="store_true", help='Option to sort the GFF3 file.')
+    parser.add_argument('-gtf','--gtf', action="store_true", help='Option to convert GFF3 to GTF file format.')
     parser.add_argument('-l', '--gene_list', type=str, help='List with gene IDs that you would like to extract.')
     parser.add_argument('-c','--coords', type=str, help='Option to extract bed-like features for selected genes.')
     parser.add_argument('-r','--range', action="store_true", help='Option to extract range from GFF3 file.')
@@ -191,8 +192,10 @@ def kargs():
     return parser.parse_args()
 
 
+
 def main():
     
+    parser = argparse.ArgumentParser(description='Library for efficiently manipulating gff3 files.')
     args = kargs()
     
     if args.gff3:
@@ -203,7 +206,12 @@ def main():
             with open(f"{inp}.sorted.gff3", "w") as f:
                 for out in GFF3.sort_gff3(args.gff3):
                     print ( out, file = f )
-                    
+
+        elif args.gtf:
+            with open(f"{inp}.gtf", "w") as f:
+                for out in GFF3.gff2gtf(args.gff3):
+                    print ( out, file = f )                   
+                   
         elif args.extract:
             with open(f"{inp}_extracted_{gene_list}.gff3", "w") as f:
                 for out in GFF3.extract_genes(args.gff3, args.gene_list):
@@ -227,4 +235,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
