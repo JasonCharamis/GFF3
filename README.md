@@ -5,4 +5,4 @@ Includes functions for:
 
 1. Sorting gff3 files
 2. Extracting user-specified ranges and/or gene coordinates
-3. Converting gff3 to bed files
+3. Converting gff3 to gtf and/or bed file formats
