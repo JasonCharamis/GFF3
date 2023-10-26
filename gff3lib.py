@@ -19,9 +19,10 @@ class GFF3:
         self.phase = phase
         self.name = name
 
+        
     def __str__(self):
         return f"{self.chromosome}\t{self.source}\t{self.type}\t{self.start}\t{self.end}\t{self.score}\t{self.strand}\t{self.phase}\t{self.name}"
-
+    
 
     def parse_gff3(input_file):
         gff3_instances = []
@@ -108,13 +109,11 @@ class GFF3:
                 if gff3_instance.start >= start and gff3_instance.end <= end:
                     subset.append ( gff3_instance )
 
-        inp = re.sub(".gff$|.gff3$","",input_file)
+        if len(subset) > 0:  
+            return subset
 
-        with open(f"{inp}_extracted_{start}_{end}.gff3", "w") as f:
-            for out in subset:
-                print ( out, file = f)
-
-        return
+        else:
+            print ("No gff3 instances in this range.")
 
     
     def extract_genes ( input_file, gene_list, coords = True ): ## extract gene coordinates from gff3 file        
@@ -159,16 +158,13 @@ class GFF3:
                             bed = '\t'.join([out.name, out.chromosome, out.start, out.end, out.strand])
                             beds.append(bed)
 
-                        return beds
+                return beds
 
         else:
             print ( "Gene list is empty or not provided." )
 
-
-
            
 ## Implementation ##
-
 def kargs():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Library for efficiently manipulating gff3 files.')
@@ -190,7 +186,6 @@ def kargs():
         print("Error: No arguments provided.")
 
     return parser.parse_args()
-
 
 
 def main():
