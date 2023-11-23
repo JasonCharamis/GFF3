@@ -165,7 +165,7 @@ class GFF3:
 
            
 ## Implementation ##
-def kargs():
+def parse_arguments():
     # Parse command-line arguments
     parser = argparse.ArgumentParser(description='Library for efficiently manipulating gff3 files.')
     parser.add_argument('--gff3', type=str, help='GFF3 file that you would like to sort.')
@@ -191,7 +191,7 @@ def kargs():
 def main():
     
     parser = argparse.ArgumentParser(description='Library for efficiently manipulating gff3 files.')
-    args = kargs()
+    args = parse_arguments()
     
     if args.gff3:
 
