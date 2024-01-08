@@ -1,7 +1,32 @@
 from natsort import natsorted
 import os, re
-import core
 import argparse
+
+def isfile(input_file, field=0): # Function to check if input is a file or a string
+
+    if os.path.isfile(input_file):
+        with open(input_file, "r") as file:
+            # Check if single or multi-column file, if latter is true select the one with gene list (good for using in associative lists of genes)
+            lines = file.readlines()
+            glist = []
+
+            for line in lines:
+                num_columns = len(line.strip().split('\t'))  # Split the first line into columns based on the delimiter
+
+                if num_columns == 1:
+                    glist.append(line.strip('\n'))
+                    
+                elif num_columns > 1:
+                    glist.append(line.split('\t')[field].strip('\n'))
+
+            sorted_list = natsorted( glist )
+
+            return sorted_list
+
+    elif isinstance(input_file, str):
+        glists = input_file
+
+    return glists
 
 
 class GFF3:
@@ -40,8 +65,7 @@ class GFF3:
                     gff3_instances.append(gff3_instance)
 
         return gff3_instances  # Return the list of instances
-
-    
+       
     def sort_gff3(input_file):
         gff3_instances = GFF3.parse_gff3(input_file)
         
@@ -83,15 +107,17 @@ class GFF3:
     def gff2bed ( input_file ): ## convert gff3 to bed format
         gff3_instances = GFF3.sort_gff3(input_file)  # Get the list of instances from sort_gff3
 
+        out = str()                        
+        bed = []
+        
         for gff3_instance in gff3_instances:
 
-            out = str()
-            gene = re.sub(".*Name=|;.*","", gff3_instance.name)
-            gene = re.sub ("-00001","",gene)
-                        
-            out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene, gff3_instance.score, gff3_instance.strand] )
-                
-        return out
+            if gff3_instance.type == "gene":
+                gene = re.sub(".*Name=|;.*","", gff3_instance.name)
+                out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene] )
+                bed.append(out)
+
+        return bed
 
             
     def extract_range (input_file, chromosome, start, end ): ## extract range from gff3 file
