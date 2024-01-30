@@ -65,7 +65,8 @@ class GFF3:
                     gff3_instances.append(gff3_instance)
 
         return gff3_instances  # Return the list of instances
-       
+
+    
     def sort_gff3(input_file):
         gff3_instances = GFF3.parse_gff3(input_file)
         
@@ -103,7 +104,7 @@ class GFF3:
 
         return ( outl )
 
-            
+           
     def gff2bed ( input_file ): ## convert gff3 to bed format
         gff3_instances = GFF3.sort_gff3(input_file)  # Get the list of instances from sort_gff3
 
@@ -117,7 +118,8 @@ class GFF3:
                 out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene] )
                 bed.append(out)
 
-        return bed
+        return sort_gff3 ( bed )
+
 
             
     def extract_range (input_file, chromosome, start, end ): ## extract range from gff3 file
