@@ -1,3 +1,6 @@
+
+#!/usr/bin/env python3
+
 from natsort import natsorted
 import os, re
 import argparse
