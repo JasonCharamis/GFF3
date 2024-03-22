@@ -253,7 +253,7 @@ def main():
                 for out in GFF3.gff2bed(args.gff3):
                     print ( out, file = f )                  
         else:
-            print("Please provide either --sort, --extract, --range, --bed or --gene_list option.")
+            print("Please provide either --sort, --extract, --range or --bed option.")
             
     else:
         print ("Please provide a gff3 file as input.")
