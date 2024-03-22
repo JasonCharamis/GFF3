@@ -155,10 +155,10 @@ class GFF3:
 
         for gff3_instance in gff3_instances:            
             if re.search("gene",gff3_instance.type):
-                geneid = re.sub(".*Name=|\.t\d|;.*","", gff3_instance.name)
+                geneid = re.sub(".*Name=|\\.t\\d|;.*","", gff3_instance.name)
 
-                if check_isfile ( gene_list ):
-                    if geneid in check_isfile ( gene_list ):
+                if isfile ( gene_list ):
+                    if geneid in isfile ( gene_list ):
                         found = True
                     else:
                         found = False
@@ -179,13 +179,13 @@ class GFF3:
             beds = []
 
             if coords == True:
-                return sorted_list
+                return subset
 
             else:
                 with open(f"{inp}_extracted_{gene_list}.bed", "w") as f:
                     for out in sorted_list:
                         if re.search("gene", out.type ):
-                            out.name = re.sub (".*Name=|\.t\d|;.*","",out.name)
+                            out.name = re.sub (".*Name=|\\.t\\d|;.*","",out.name)
                             bed = '\t'.join([out.name, out.chromosome, out.start, out.end, out.strand])
                             beds.append(bed)
 
@@ -239,7 +239,7 @@ def main():
                     print ( out, file = f )                   
                    
         elif args.extract:
-            with open(f"{inp}_extracted_{gene_list}.gff3", "w") as f:
+            with open(f"{inp}_extracted_{args.gene_list}.gff3", "w") as f:
                 for out in GFF3.extract_genes(args.gff3, args.gene_list):
                     print ( out, file = f )
 
