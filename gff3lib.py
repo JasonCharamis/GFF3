@@ -121,7 +121,7 @@ class GFF3:
                 out = '\t'.join([gff3_instance.chromosome, gff3_instance.start, gff3_instance.end, gene] )
                 bed.append(out)
 
-        return sort_gff3 ( bed )
+        return bed
 
 
             
